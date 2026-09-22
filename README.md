@@ -100,4 +100,4 @@ The full write-up — theoretical background, hardware/software co-design detail
 
 ## License
 
-Add your license of choice here (e.g. MIT, Apache-2.0) before publishing.
+Sheinberg Yoav and Shor Guy
