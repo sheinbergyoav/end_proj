@@ -1,0 +1,8 @@
+// tq_tie_step2.tie
+// Hardware Index State
+
+state TQ_IDX_STATE 24
+
+operation TQ_IDX_LOAD {in AR packed24} {out TQ_IDX_STATE} {
+    assign TQ_IDX_STATE = packed24[23:0];
+}
