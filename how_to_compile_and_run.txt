@@ -1,0 +1,21 @@
+cd /home/sheinby70/end_project/llama2c_q
+
+gcc -O3 -fopenmp -o run runq.c -lm
+
+./run
+
+to use python :
+source venv/bin/activate.csh
+pip install torch transformers
+python export.py tinyllama_1b_chat_q80.bin --version 2 --hf TinyLlama/TinyLlama-1.1B-Chat-v1.0
+if not works use instead:
+env HF_HOME="/tmp/huggingface_cache_$USER" python export.py --hf TinyLlama/TinyLlama-1.1B-Chat-v1.0 bin/tinyllama.bin
+
+to create a quant bin file (we use version 2):
+python export.py stories15M_q80.bin --version 2 --checkpoint stories15M.pt
+
+to convert bin file to header:
+xxd -i bin/stories15M_q80.bin > stories15M_q80.h
+
+to generate constants - constatns are per llama2 model, we get the dim from the binary. also we use TQ=4(hardcoded) , it generates the TIE centriods as well:
+python generate_tq_constants.py -m bin/stories15M_q80.bin
