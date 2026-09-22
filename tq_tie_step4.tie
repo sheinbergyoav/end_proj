@@ -1,0 +1,52 @@
+// tq_tie_step4.tie
+// SIMD Accumulation for the Value Reconstruction Path
+
+// Register file with 32 registers, each 64-bits wide
+regfile TQ_VACC 64 32 v
+
+// Clear a specific accumulator register
+operation TQ_VACC_CLR {out TQ_VACC acc_out} {} {
+    assign acc_out = 64'b0;
+}
+
+// Executes 2 parallel MACs using a shared scalar weight
+operation TQ_SCALEACC2 {inout TQ_VACC acc, in AR a_q15, in AR indices} {} {
+    wire [2:0] idx0 = indices[2:0];
+    wire [2:0] idx1 = indices[5:3];
+    
+    wire [15:0] c0 = tq_get_cent(idx0);
+    wire [15:0] c1 = tq_get_cent(idx1);
+    wire [15:0] w  = a_q15[15:0];
+    
+    // Manual sign extension to 32 bits for hardware multipliers
+    wire [31:0] c0_ext = { {16{c0[15]}}, c0 };
+    wire [31:0] c1_ext = { {16{c1[15]}}, c1 };
+    wire [31:0] w_ext  = { {16{w[15]}},  w  };
+    
+    wire [31:0] p0 = c0_ext * w_ext;
+    wire [31:0] p1 = c1_ext * w_ext;
+    
+    // Add rounding constant (2^14 = 16384) to force round-to-nearest
+    wire [31:0] p0_rnd = p0 + 32'h4000;
+    wire [31:0] p1_rnd = p1 + 32'h4000;
+    
+    // Explicit arithmetic shift right by 15 using concatenation
+    wire [31:0] p0_shifted = { {15{p0_rnd[31]}}, p0_rnd[31:15] };
+    wire [31:0] p1_shifted = { {15{p1_rnd[31]}}, p1_rnd[31:15] };
+    
+    // Accumulate the rounded, safely shifted values
+    wire [31:0] acc0 = acc[31:0]  + p0_shifted;
+    wire [31:0] acc1 = acc[63:32] + p1_shifted;
+    
+    // Concatenate and write back
+    assign acc = {acc1, acc0};
+}
+
+// Read instructions to retrieve the 64-bit accumulator halves back into 32-bit AR registers
+operation TQ_VACC_RD0 {out AR res, in TQ_VACC acc_in} {} {
+    assign res = acc_in[31:0];
+}
+
+operation TQ_VACC_RD1 {out AR res, in TQ_VACC acc_in} {} {
+    assign res = acc_in[63:32];
+}
