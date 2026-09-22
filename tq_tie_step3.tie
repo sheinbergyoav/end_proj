@@ -1,0 +1,47 @@
+// tq_tie_step3.tie
+// Parallel MACs for Base Score (PolarQuant)
+
+state TQ_ACC 40 // 40 bits prevents overflow during heavy accumulation
+
+operation TQ_ACC_CLR {} {out TQ_ACC} {
+    assign TQ_ACC = 40'b0;
+}
+
+// Executes 2 parallel MACs in a single clock cycle
+operation TQ_DECMAC2 {in AR qp_pair} {inout TQ_ACC, inout TQ_IDX_STATE} {
+    wire [2:0] idx0 = TQ_IDX_STATE[2:0];
+    wire [2:0] idx1 = TQ_IDX_STATE[5:3];
+    
+    wire [15:0] c0 = tq_get_cent(idx0);
+    wire [15:0] c1 = tq_get_cent(idx1);
+    
+    wire [15:0] q0 = qp_pair[15:0];
+    wire [15:0] q1 = qp_pair[31:16];
+    
+    // Manual sign extension to 32 bits
+    wire [31:0] c0_ext = { {16{c0[15]}}, c0 };
+    wire [31:0] q0_ext = { {16{q0[15]}}, q0 };
+    wire [31:0] c1_ext = { {16{c1[15]}}, c1 };
+    wire [31:0] q1_ext = { {16{q1[15]}}, q1 };
+    
+    wire [31:0] p0 = c0_ext * q0_ext;
+    wire [31:0] p1 = c1_ext * q1_ext;
+    
+    // Extend products to 40 bits to match TQ_ACC
+    wire [39:0] p0_40 = { {8{p0[31]}}, p0 };
+    wire [39:0] p1_40 = { {8{p1[31]}}, p1 };
+    
+    assign TQ_ACC = TQ_ACC + p0_40 + p1_40;
+    
+    // Shift state by 6 bits (two 3-bit indices) for the next cycle
+    assign TQ_IDX_STATE = TQ_IDX_STATE >> 6;
+}
+
+operation TQ_ACC_RD {out AR res} {in TQ_ACC} {
+    // Explicit arithmetic shift right by 15 using concatenation
+    // Replicate the sign bit (bit 39) 15 times
+    wire [39:0] acc_shifted = { {15{TQ_ACC[39]}}, TQ_ACC[39:15] };
+    
+    // The safely scaled down result now perfectly fits in 32 bits
+    assign res = acc_shifted[31:0];
+}
