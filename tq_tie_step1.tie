@@ -1,0 +1,37 @@
+// tq_tie_step1.tie
+
+state TQ_SGN_STATE 32
+state TQ_SACC 32
+
+operation TQ_SACC_CLR {} {out TQ_SACC} {
+    assign TQ_SACC = 32'b0;
+}
+
+operation TQ_SGN_LOAD {in AR w} {out TQ_SGN_STATE} {
+    assign TQ_SGN_STATE = w;
+}
+
+operation TQ_SGNACC2 {in AR qm_pair} {inout TQ_SACC, inout TQ_SGN_STATE} {
+    wire [15:0] qm0 = qm_pair[15:0];
+    wire [15:0] qm1 = qm_pair[31:16];
+    
+    wire bit0 = TQ_SGN_STATE[0];
+    wire bit1 = TQ_SGN_STATE[1];
+    
+    // Manual sign extension to 32 bits
+    wire [31:0] qm0_ext = { {16{qm0[15]}}, qm0 };
+    wire [31:0] qm1_ext = { {16{qm1[15]}}, qm1 };
+    
+    // 2's complement negation for subtraction
+    wire [31:0] val0 = bit0 ? qm0_ext : (~qm0_ext + 32'b1);
+    wire [31:0] val1 = bit1 ? qm1_ext : (~qm1_ext + 32'b1);
+    
+    assign TQ_SACC = TQ_SACC + val0 + val1;
+    
+    // Shift state by 2
+    assign TQ_SGN_STATE = TQ_SGN_STATE >> 2;
+}
+
+operation TQ_SACC_RD {out AR res} {in TQ_SACC} {
+    assign res = TQ_SACC;
+}
