@@ -1,0 +1,25 @@
+// tq_tie_q15mac2.tie
+// Dual 16-bit Q15 Multiply-Accumulate for tq_matvec
+
+operation Q15MAC2 {inout AR acc, in AR mat_packed, in AR vec_packed} {} {
+    // Unpack two 16-bit values from the matrix register
+    wire [15:0] m0 = mat_packed[15:0];
+    wire [15:0] m1 = mat_packed[31:16];
+
+    // Unpack two 16-bit values from the vector register
+    wire [15:0] v0 = vec_packed[15:0];
+    wire [15:0] v1 = vec_packed[31:16];
+
+    // Explicit manual sign-extension to 32-bits
+    wire [31:0] m0_ext = { {16{m0[15]}}, m0 };
+    wire [31:0] m1_ext = { {16{m1[15]}}, m1 };
+    wire [31:0] v0_ext = { {16{v0[15]}}, v0 };
+    wire [31:0] v1_ext = { {16{v1[15]}}, v1 };
+
+    // Multiply (produces 32-bit results)
+    wire [31:0] p0 = m0_ext * v0_ext;
+    wire [31:0] p1 = m1_ext * v1_ext;
+
+    // Accumulate the two products in a single cycle
+    assign acc = acc + p0 + p1;
+}
