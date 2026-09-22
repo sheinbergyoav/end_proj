@@ -1,0 +1,24 @@
+// Auto-generated tq_cent_table.tie
+// Hardware ROM for TurboQuant Centroids
+
+function [15:0] tq_get_cent ( [2:0] idx ) {
+    wire [15:0] c0 = 16'hD944; // float: -0.302612
+    wire [15:0] c1 = 16'hE78E; // float: -0.190979
+    wire [15:0] c2 = 16'hF22F; // float: -0.107927
+    wire [15:0] c3 = 16'hFB84; // float: -0.035020
+    wire [15:0] c4 = 16'h047D; // float: 0.035071
+    wire [15:0] c5 = 16'h0DD1; // float: 0.107927
+    wire [15:0] c6 = 16'h1872; // float: 0.190979
+    wire [15:0] c7 = 16'h26BC; // float: 0.302612
+
+    // Single-cycle combinatorial MUX
+    assign tq_get_cent = 
+        (idx == 3'd0) ? c0 :
+        (idx == 3'd1) ? c1 :
+        (idx == 3'd2) ? c2 :
+        (idx == 3'd3) ? c3 :
+        (idx == 3'd4) ? c4 :
+        (idx == 3'd5) ? c5 :
+        (idx == 3'd6) ? c6 :
+        c7;
+}
