@@ -1,4 +1,3 @@
-\usepackage{underscore}
 The inference loop of the TinyStories model follows the standard autoregressive Transformer decoder pipeline ($x \to \text{RMSNorm} \to \text{QKV Projections} \to \text{Attention with TurboQuant KV-Cache} \to \text{Out Projection} \to \text{FFN/MLP} \to \text{Logits}$).
 
 The custom TIE operations accelerate compute-bound matrix multiplications (dense GEMV) and the quantized TurboQuant KV-cache attention datapath.
