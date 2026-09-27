@@ -1,0 +1,14 @@
+// Centroid Dequantization and Parallel Dual 16-bit MAC
+operation TQ_MAC2 {out AR out_acc, in AR in_acc, in AR centroids, in AR activations} {}
+{
+    wire [15:0] cent0 = centroids[15:0];
+    wire [15:0] cent1 = centroids[31:16];
+    wire [15:0] act0  = activations[15:0];
+    wire [15:0] act1  = activations[31:16];
+
+    // First MAC stage: in_acc + (cent0 * act0)
+    wire [31:0] acc1 = TIEmac(cent0, act0, in_acc, 1'b1, 1'b0);
+
+    // Second MAC stage: acc1 + (cent1 * act1)
+    assign out_acc   = TIEmac(cent1, act1, acc1,   1'b1, 1'b0);
+}
