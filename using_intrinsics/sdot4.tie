@@ -1,0 +1,17 @@
+// 4-way INT8 Signed Dot Product with 32-bit Accumulator
+operation SDOT4 {out AR res, in AR a_packed, in AR b_packed, in AR acc} {}
+{
+    // 8-bit slice multiplications with signed flag = 1'b1
+    wire [31:0] p0 = TIEmul(a_packed[7:0],   b_packed[7:0],   1'b1);
+    wire [31:0] p1 = TIEmul(a_packed[15:8],  b_packed[15:8],  1'b1);
+    wire [31:0] p2 = TIEmul(a_packed[23:16], b_packed[23:16], 1'b1);
+    wire [31:0] p3 = TIEmul(a_packed[31:24], b_packed[31:24], 1'b1);
+
+    // Balanced 2-level adder tree using carry-in = 1'b0
+    wire [31:0] sum01   = TIEadd(p0, p1, 1'b0);
+    wire [31:0] sum23   = TIEadd(p2, p3, 1'b0);
+    wire [31:0] dot_all = TIEadd(sum01, sum23, 1'b0);
+
+    // Final accumulation into acc
+    assign res = TIEadd(acc, dot_all, 1'b0);
+}
