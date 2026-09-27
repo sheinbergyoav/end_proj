@@ -1,0 +1,18 @@
+// Centroid Index Unpacking and Address Offset Calculation
+operation TQ_IDX_LOAD {out AR target_addr, in AR base_addr, in AR packed_indices, in AR slot_sel} {}
+{
+    // Extract 4-bit index slices from packed word (free wiring)
+    wire [3:0] idx0 = packed_indices[3:0];
+    wire [3:0] idx1 = packed_indices[7:4];
+    wire [3:0] idx2 = packed_indices[11:8];
+    wire [3:0] idx3 = packed_indices[15:12];
+
+    // Hardware MUX to select the active index based on slot_sel[1:0]
+    wire [3:0] chosen_idx = TIEmux(slot_sel[1:0], idx0, idx1, idx2, idx3);
+
+    // Byte offset: idx * 4 (shift by constant is free wiring)
+    wire [31:0] byte_offset = {26'b0, chosen_idx, 2'b00};
+
+    // Address generation using built-in adder
+    assign target_addr = TIEadd(base_addr, byte_offset, 1'b0);
+}
