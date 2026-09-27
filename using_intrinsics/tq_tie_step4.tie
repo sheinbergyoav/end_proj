@@ -1,0 +1,12 @@
+// Dual 16-bit SIMD Vector Addition for Value Reconstruction
+operation TQ_VEC_ADD2 {out AR v_out, in AR v_in1, in AR v_in2} {}
+{
+    // Lower 16-bit half addition
+    wire [15:0] lo_res = TIEadd(v_in1[15:0], v_in2[15:0], 1'b0);
+
+    // Upper 16-bit half addition
+    wire [15:0] hi_res = TIEadd(v_in1[31:16], v_in2[31:16], 1'b0);
+
+    // Pack both halves back into a 32-bit register (free wiring)
+    assign v_out = {hi_res, lo_res};
+}
