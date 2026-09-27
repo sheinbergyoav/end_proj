@@ -1,0 +1,10 @@
+// Residual Sign Accumulation for TurboQuant Step 1
+operation TQ_SGNACC2 {out AR res, in AR acc, in AR step_val, in AR sgn_bits} {}
+{
+    wire [15:0] s0 = step_val[15:0];
+    wire [15:0] s1 = step_val[31:16];
+
+    // negate = sgn_bits[bit]: 0 -> (acc + step*1), 1 -> (acc - step*1)
+    wire [31:0] acc_mid = TIEmac(s0, 16'd1, acc,     1'b1, sgn_bits[0]);
+    assign res          = TIEmac(s1, 16'd1, acc_mid, 1'b1, sgn_bits[1]);
+}
