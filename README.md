@@ -100,4 +100,17 @@ The full write-up — theoretical background, hardware/software co-design detail
 
 ## License
 
-Sheinberg Yoav and Shor Guy
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
+
+Copyright (c) 2026 Yoav Sheinberg , Guy Shor , David Frued
+
+## Acknowledgements
+
+- Inference engine and export format are based on
+  [llama2.c](https://github.com/karpathy/llama2.c) by Andrej Karpathy (MIT).
+- TurboQuant and QJL: please cite the original papers (add BibTeX below).
+- Model: stories15M by Andrej Karpathy, trained on TinyStories (Eldan & Li).
+- Built with Cadence Xtensa / Tensilica tools. Cadence, Tensilica and Xtensa are
+  trademarks of Cadence Design Systems, Inc. No Cadence proprietary files are included.
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for details.
